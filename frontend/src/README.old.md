@@ -1,39 +1,3 @@
-# Prerequisites
-Before you begin, ensure you have the following installed:
-
-Node.js (v14 or later recommended) - for running the backend and frontend.
-npm (Node Package Manager) - comes with Node.js.
-Jira Account - Required for OAuth and Jira API access.
-
-# TypeScript Support
-
-This project is built with TypeScript to ensure type safety, improve maintainability, and catch potential issues early during development.
-
-# The following essential files are TypeScript-based:
-
-tsconfig.json: Configuration file for TypeScript.
-Home.tsx: Contains TypeScript types for form fields, props, and hooks.
-
-# To clone the Repo 
-git clone <repository-url>
-cd <repository-name>
-Run npm install after cloning under backend,frontend and frontend/src directory
-
-# Set up env file
-CLIENT_ID=your-client-id
-CLIENT_SECRET=your-client-secret
-REDIRECT_URI=http://localhost:4000/oauth/callback
-JIRA_API_URL=https://your-instance.atlassian.net
-
-# To start backend 
-npm run dev
-
-# Endpoints available:
-
-GET /oauth/start: Redirects to Jira's OAuth authorization URL.
-GET /oauth/callback: Handles the callback from Jira after OAuth.
-POST /create-issue: Endpoint to create Jira issues using the received access token.
-
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
