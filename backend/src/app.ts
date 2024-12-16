@@ -53,10 +53,8 @@ app.get('/oauth/callback', async (req: Request, res: Response): Promise<void> =>
       const error = await response.json();
       throw new Error(error.error_description || 'OAuth failed');
     }
-
     const data = await response.json();
     accessToken = data.access_token as string;
-
     res.redirect(`http://localhost:3000?access_token=${accessToken}`);
 
   } catch (error: unknown) {
@@ -67,28 +65,46 @@ app.get('/oauth/callback', async (req: Request, res: Response): Promise<void> =>
     }
   }
 });
-
+interface IssueFields {
+  project: {
+    key: string;
+  };
+  summary: string;
+  description: {
+    type: string;
+    version: number;
+    content: {
+      type: string;
+      text: string;
+    }[];
+  };
+  issuetype: {
+    name: string;
+  };
+}
 app.post('/create-issue', async (req: Request, res: Response): Promise<void> => {
-  const { 
-    fields: { 
-      project: { key: projectKey }, 
-      summary, 
-      description 
-    } 
-  } = req.body;
-
+  const { fields } = req.body as { fields: IssueFields };
+  const { project: { key: projectKey }, summary, description, issuetype } = fields;
+  const { content, type, version } = description; // Destructure top-level 'description' object
   if (!accessToken) {
     res.status(401).json({ status: "Failure", message: "OAuth authorization is required. Please authenticate first." });
     return;
   }
 
-  const payload = { fields: { project: { key: projectKey }, summary, description, issuetype: { name: "Bug" } } };
+const payload = {
+  fields: {
+    project: { key: projectKey },
+    summary,
+    description, // Use the `description` as-is from the frontend
+    issuetype: { name: issuetype.name }
+  }
+};
 
   try {
-    const response = await fetch(`${JIRA_API_URL}/rest/api/3/issue`, {
+    const response = await fetch(`https://api.atlassian.com/ex/jira/30d19e6a-9fb0-4c20-8dcc-bffb242ac677/rest/api/3/issue`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer${accessToken}`,
+        'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
@@ -101,7 +117,12 @@ app.post('/create-issue', async (req: Request, res: Response): Promise<void> => 
     }
 
     const data = await response.json();
-    res.status(200).json({ status: "Success", message: "Jira issue created", data: data });
+    res.status(200).json({ 
+      status: "Success", 
+      message: "Jira issue created", 
+      id: data.id, 
+      key: data.key 
+    });
   } catch (error) {
     if (error instanceof Error) {
       res.status(500).json({ status: "Failure", message: `Jira issue creation failed: ${error.message}` });

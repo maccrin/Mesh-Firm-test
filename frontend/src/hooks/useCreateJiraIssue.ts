@@ -22,9 +22,23 @@ export const useCreateJiraIssue = () => {
         fields: {
           project: { key: projectKey },
           summary,
-          description,
-          issuetype: { name: "Task" },
-        },
+          description: {
+            type: "doc",
+            version: 1,
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    text: description, // Actual issue description
+                    type: "text"
+                  }
+                ]
+              }
+            ]
+          },
+          issuetype: { name: "Bug" }
+        }
       };
       const response = await fetch("http://localhost:4000/create-issue", {
         method: "POST",
